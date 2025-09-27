@@ -1,0 +1,47 @@
+# ROS 2 build and install directories
+build/
+install/
+log/
+
+# Colcon test results
+test_results/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# CMake artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Launch logs
+*.log
+
+# Editor / IDE configs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Colcon metadata
+.colcon/
+.colcon_install_cache
+
+# Generated docs
+docs/_build/
+*.html
+
+# Backup files
+*~
+*.bak
+*.tmp
+
+# ROS 2 specific
+ament_cmake_core/package.cmake
+ament_cmake_core/environment_hooks/
+
