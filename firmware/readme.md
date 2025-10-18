@@ -1,1 +1,1 @@
-#Firmware code for the motorcontrolelr
+#Firmware code for the motorcontroller
