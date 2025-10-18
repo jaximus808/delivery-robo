@@ -6,7 +6,6 @@
 
 #define BAUDRATE 57600
 
-
 /* Command parsing variables */
 
 // A pair of varibles to help parse serial commands (thanks Fergs)
@@ -42,21 +41,27 @@ void processBuffer();
 void setup() {
   Serial.begin(BAUDRATE);
   pinMode(LED_BUILTIN, OUTPUT);
-  resetCommand();
+  // motorInit();
 }
 
 void loop() {
   processBuffer();
+  // motorUpdate();
 }
 
 void runCommand() {
   switch (cmd) {
-  case SET_MOTOR_PWM:
-    //TODO
+  case SET_DRIVE_PWM:
+    // int s = (int) arg1;
+    // if (s < 0 || s > 255) errorCommand();
+    // setMotorPWM(DRIVE_MOTOR, arg1);
+    break;
   case SET_DRIVE_VEL:
-    //TODO
-  case SET_TURNING_POS:
-    //TODO
+    // setDriveVel(arg1);
+    break;
+  case SET_TURN_ANGLE:
+    // setTurnAngle(arg2);
+    break;
   case GET_ENCODER:
     //TODO
   case TEST_BLINK_ON:
