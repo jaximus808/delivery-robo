@@ -29,7 +29,17 @@ void loop() {
 
 // Check the time to determine whether to report data to the Pi
   if (millis() - lastReportTime >= reportInterval) {
-    Serial.println(encoderValue);
+
+    // make a copy of encoderValue without volatility
+long encoderValueSteady;
+    noInterrupts();
+    encoderValueSteady = encoderValue;
+    interrupts();
+
+    // Convert non-volatile encoderValue to a string
+    String myString = String(encoderValueSteady);
+
+    Serial.println("*" + encoderValueSteady + "*");
     lastReportTime = millis();
   }
 
