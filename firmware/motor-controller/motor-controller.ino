@@ -1,7 +1,5 @@
-#include <Arduino.h>
-
-#include <commands.h>
-#include <motor_driver.h>
+#include "commands.h"
+#include "motor_driver.h"
 
 
 #define BAUDRATE 57600
@@ -30,6 +28,7 @@ double arg2;
 // Run command based on currently parsed command:
 void runCommand();
 
+// Reset command variables to parse a new command
 void resetCommand();
 
 // Error parsing command, send back an error over serial
@@ -98,16 +97,19 @@ void errorCommand() {
 void processBuffer() {
   while (Serial.available() > 0) {
     chr = Serial.read();
-
+    // New command/run command
     if (chr == NEW_COMMAND) {
+      // Terminate arg array with null byte
       if (arg == 1) argv1[index] = '\0';
       else if (arg == 2) argv2[index] = '\0';
+      // Convert arg array to double
       arg1 = atof(argv1);
       arg2 = atof(argv2);
+      // Run command if a command is set
       if (cmd != '\0') runCommand();
       resetCommand();
     }
-
+    // New arg
     else if (chr == NEW_ARG) {
       if (arg == 0) arg++;
       else if (arg == 1) {
@@ -116,9 +118,10 @@ void processBuffer() {
         index = 0;
       }
     }
-
+    // Processing other characters
     else {
       if (arg == 0) {
+        // Error if command is already set
         if (cmd != '\0') errorCommand();
         else cmd = chr;
       } else if (arg == 1) {
