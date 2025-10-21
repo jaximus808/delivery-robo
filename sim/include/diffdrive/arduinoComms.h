@@ -1,12 +1,11 @@
-#ifndef DIFFDRIVE_ARDUINO_ARDUINO_COMMS_H
-#define DIFFDRIVE_ARDUINO_ARDUINO_COMMS_H
+#ifndef DIFFDRIVE_ARDUINOCOMMS_H
+#define DIFFDRIVE_ARDUINOCOMMS_H
 
 #include <serial/serial.h>
 #include <cstring>
 
 class ArduinoComms
 {
-
 
 public:
 
