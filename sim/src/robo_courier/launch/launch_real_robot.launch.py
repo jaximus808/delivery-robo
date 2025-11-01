@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, TimerAction, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, TimerAction, RegisterEventHandler, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.event_handlers import OnProcessStart
@@ -100,11 +100,6 @@ def generate_launch_description():
         output="screen"
     )
 
-    # Delay controller_manager until after RSP publishes TF tree
-    delayed_controller_manager = TimerAction(
-        period=3.0,
-        actions=[controller_manager]
-    )
 
     # --- Spawners ---
     ack_drive_spawner = Node(
@@ -121,14 +116,40 @@ def generate_launch_description():
         output="screen"
     )
 
-
     # Spawn controllers *after* controller_manager starts
-    controller_manager_ready = RegisterEventHandler(
+    # Increased delay from 2.0 to 5.0 seconds to ensure controller_manager is fully initialized
+    delayed_spawners = TimerAction(
+        period=1.0,
+        actions=[joint_broad_spawner]
+    )
+    
+
+    ack_drive_spawner_event = RegisterEventHandler(
+    
         event_handler=OnProcessStart(
-            target_action=controller_manager,
+            target_action=joint_broad_spawner,
             on_start=[
-                # Wait 5 seconds *after* controller_manager starts
-                TimerAction(period=2.0, actions=[ack_drive_spawner, joint_broad_spawner])
+                TimerAction(period=1.0, actions=[ack_drive_spawner])
+            ]
+        )
+    )
+
+    
+
+    controller_manager_cmd = ExecuteProcess(
+        cmd=[
+            'ros2', 'run', 'controller_manager', 'ros2_control_node',
+        ],
+        output='screen'
+    )
+
+
+    ros2_control_node = RegisterEventHandler(
+    
+        event_handler=OnProcessStart(
+            target_action=ack_drive_spawner,
+            on_start=[
+                TimerAction(period=1.0, actions=[controller_manager_cmd])
             ]
         )
     )
@@ -139,6 +160,8 @@ def generate_launch_description():
         joystick,
         twist_mux,
         twist_stamp,
-        delayed_controller_manager,
-        controller_manager_ready,
+        controller_manager,
+        delayed_spawners,
+        ack_drive_spawner_event,
+        ros2_control_node,
     ])
