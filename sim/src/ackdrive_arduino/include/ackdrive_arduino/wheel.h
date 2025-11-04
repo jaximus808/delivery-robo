@@ -1,5 +1,5 @@
-#ifndef DIFFDRIVE_ARDUINO_WHEEL_H
-#define DIFFDRIVE_ARDUINO_WHEEL_H
+#ifndef ACKDRIVE_WHEEL_H
+#define ACKDRIVE_WHEEL_H
 
 #include <string>
 
@@ -23,4 +23,4 @@ public:
   double calcEncAngle();
 };
 
-#endif // DIFFDRIVE_ARDUINO_WHEEL_H
+#endif // ACKDRIVE_ARDUINO_REAL_ROBOT_H

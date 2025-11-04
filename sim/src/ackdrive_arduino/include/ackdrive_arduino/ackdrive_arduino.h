@@ -1,5 +1,5 @@
-#ifndef ACKDRIVE_ARDUINO_REAL_ROBOT_H
-#define ACKDRIVE_ARDUINO_REAL_ROBOT_H
+#ifndef ACKDRIVE_ARDUINO_H
+#define ACKDRIVE_ARDUINO_H
 
 #include "rclcpp/rclcpp.hpp"
 #include <cstring>
@@ -8,7 +8,7 @@
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
-// #include "arduino_comms.h"
+#include "arduino_comms.h"
 #include "config.h"
 #include "wheel.h"
 
@@ -35,7 +35,7 @@ public:
 
 private:
     Config cfg_;
-    // ArduinoComms arduino_;
+    ArduinoComms arduino_;
     
     // Four separate joints
     Wheel left_steer_;          // left_wheel_hinge

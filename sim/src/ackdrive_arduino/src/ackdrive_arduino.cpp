@@ -204,7 +204,7 @@ return_type AckDriveArduino::write(const rclcpp::Time & time, const rclcpp::Dura
 
     // When ready to send to Arduino:
     // arduino_.setSteeringAngle(virtual_steering_angle);
-    // arduino_.setMotorVelocities(left_rear_wheel_.cmd, right_rear_wheel_.cmd);
+    this->arduino_.setMotorValues(left_rear_wheel_.cmd, right_rear_wheel_.cmd);
 
     return return_type::OK;
 }
