@@ -5,10 +5,7 @@
 volatile long encoderValue = 0;  // the current click count
 unsigned long lastReportTime = 0; // the last time data was reported to the Pi
 const int reportInterval = 20; // Report the count every 20 milliseconds
-//long previousValue = 0;          // the old click count
-//long lastReportedValue = 0;
-//unsigned long previousTime = 0;  // the last time snapshot taken
-//const int sampleTime = 50;       // setting a sample time interval to 50 milliseconds (will be used to calculate velocity)
+volatile int8_t lastEncoded = 0;
 
 void setup() {
   // Set encoder pins as inputs with internal pull-up resistors
@@ -51,35 +48,41 @@ long encoderValueSteady;
   }
 }
 
-//Initial distance/velocity calculations, not needed for the Arduino because the Pi will be doing the work
-
-  //if (encoderValue != lastReportedValue) {
-    //Serial.println(encoderValue);
-   // lastReportedValue = encoderValue;
-  //}
-
-  //if (currentTime - previousTime >= sampleTime) {  // the calculation only runs when a minimum of 50 milliseconds have elapsed
-    //long positionChange = encoderValue - previousValue;
-   // float currentVelocity = positionChange * 1000 / (currentTime - previousTime);  //the *1000 converts from counts/millisecond to counts/second
-    // print to Serial Monitor
-  //  Serial.print("Velocity: ");
-   // Serial.print(velocity);
-   // Serial.println(" counts per second");
-    //  previousValue = encoderValue;
-   // previousTime = currentTime;
- // }
-//}
-
 //This function is called whenever an interrupt occurs
-void updateEncoder() {
+//void updateEncoder() {
   // Read the current state of the two pins
-  int clkState = digitalRead(ENCODER_CLK);
-  int dtState = digitalRead(ENCODER_DT);
+  //int clkState = digitalRead(ENCODER_CLK);
+  //int dtState = digitalRead(ENCODER_DT);
 
   // Determine direction based on the state of the other pin
-  if (clkState != dtState) {
-    encoderValue++;  // Clockwise
-  } else {
-    encoderValue--;  // Counter-clockwise
+ // if (clkState != dtState) {
+ //   encoderValue++;  // Clockwise
+ // } else {
+  //  encoderValue--;  // Counter-clockwise
+  //}
+//}
+
+// This function is called whenever an interrupt occurs
+void updateEncoder() {
+  // Read the current state of the two pins
+  int MSB = digitalRead(ENCODER_CLK); // Channel A
+  int LSB = digitalRead(ENCODER_DT); // Channel B
+
+  // Convert the two-bit state to a single number (0, 1, 2, or 3)
+  int encoded = (MSB << 1) | LSB; 
+
+  // Combine the previous state and new state into a 4-bit number
+  // (Bits 3 & 2 are old state, Bits 1 & 0 are new state)
+  int sum = (lastEncoded << 2) | encoded;
+  // Use a state-table to determine direction
+  // This looks complex, but it's just a fast way to check valid transitions
+  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
+    encoderValue++; // Clockwise
   }
+  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
+    encoderValue--; // Counter-clockwise
+  }
+
+  // Store the new state as the "last" state for the next interrupt
+  lastEncoded = encoded; 
 }
