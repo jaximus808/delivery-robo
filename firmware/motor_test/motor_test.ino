@@ -1,6 +1,6 @@
 // Define motor driver pins
-#define IN1 2
-#define IN2 3
+#define IN1 4
+#define IN2 5
 #define ENA 9 // PWM pin for speed control
 
 void setup() {
