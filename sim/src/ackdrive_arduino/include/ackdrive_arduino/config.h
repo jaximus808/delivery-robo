@@ -1,5 +1,5 @@
-#ifndef DIFFDRIVE_ARDUINO_CONFIG_H
-#define DIFFDRIVE_ARDUINO_CONFIG_H
+#ifndef ACKDRIVE_ARDUINO_REAL_ROBOT_H
+#define ACKDRIVE_ARDUINO_REAL_ROBOT_H
 
 #include <string>
 
@@ -15,4 +15,4 @@ struct Config {
   int enc_counts_per_rev = 1920;
 };
 
-#endif // DIFFDRIVE_ARDUINO_CONFIG_H
+#endif // ACKDRIVE_ARDUINO_REAL_ROBOT_H

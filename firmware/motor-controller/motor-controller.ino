@@ -20,39 +20,44 @@ void processBuffer();
 
 void setup() {
   Serial.begin(BAUDRATE);
-  pinMode(LED_BUILTIN, OUTPUT);
+  // pinMode(LED_BUILTIN, OUTPUT);
   motorInit(); // initialize motors
 }
 
 void loop() {
   processBuffer();
-  motorUpdate(); // keep PID running
+  // motorUpdate(); // keep PID running
 }
 
 void runCommand() {
   switch (cmd) {
     case SET_DRIVE_PWM: // "m val1 val2"
-      setMotorPWM(DRIVE_MOTOR, (int)arg1);
-      setMotorPWM(TURN_MOTOR, (int)arg2);
+      setDriveSpeed((int)arg1);
+      setTurnAngle((int)arg2);
+      Serial.print("Parsed - Vel: ");
+      Serial.print((int)arg1);
+      Serial.print(" | Angle: ");
+      Serial.println((int)arg2);
+
       break;
 
-    case SET_DRIVE_VEL: // "v val"
-      setDriveVel(arg1);
-      break;
+    // case SET_DRIVE_VEL: // "v val"
+    //   setDriveVel(arg1);
+    //   break;
 
-    case SET_TURN_ANGLE: // "r val"
-      setTurnAngle(arg1);
-      break;
+    // case SET_TURN_ANGLE: // "r val"
+    //   setTurnAngle(arg1);
+    //   break;
 
     case SET_PID: // "u kp:kd:ki:ko"
       // TODO: parse colon-delimited values and call setPidValues()
       break;
 
-    case GET_ENCODER: // "e"
-      Serial.print(getDriveVel());
-      Serial.print(" ");
-      Serial.println(getTurnAngle());
-      break;
+    // case GET_ENCODER: // "e"
+    //   Serial.print(getDriveVel());
+    //   Serial.print(" ");
+    //   Serial.println(getTurnAngle());
+    //   break;
 
     case TEST_BLINK_ON: // "o"
       digitalWrite(LED_BUILTIN, HIGH);
@@ -99,6 +104,10 @@ void processBuffer() {
       arg1 = atof(argv1);
       arg2 = atof(argv2);
 
+      Serial.print("ddd Parsed - Vel: ");
+      Serial.print(arg1);
+      Serial.print(" | ddd Angle: ");
+      Serial.println(arg2);
       if (cmd != '\0') runCommand();
       resetCommand();
     }
