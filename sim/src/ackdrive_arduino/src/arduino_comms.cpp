@@ -1,6 +1,6 @@
 #include "ackdrive_arduino/arduino_comms.h"
 // #include <ros/console.h>
-// #include <rclcpp/rclcpp.hpp> error here
+#include <rclcpp/rclcpp.hpp> 
 #include <sstream>
 #include <cstdlib>
 
@@ -35,10 +35,10 @@ void ArduinoComms::readEncoderValues(int &val_1, int &val_2)
     val_2 = std::atoi(token_2.c_str());
 }
 
-void ArduinoComms::setMotorValues(double val_1, double val_2)
+void ArduinoComms::setMotorValues(double rear_cmd, double steer_cmd)
 {
     std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
+    ss << "m " << rear_cmd <<" "<< steer_cmd << "\r";
     sendMsg(ss.str(), false);
 }
 
@@ -51,14 +51,14 @@ void ArduinoComms::setPidValues(float k_p, float k_d, float k_i, float k_o)
 
 std::string ArduinoComms::sendMsg(const std::string &msg_to_send, bool print_output)
 {
+
     serial_conn_.write(msg_to_send);
     std::string response = serial_conn_.readline();
 
-    if (print_output)
-    {
-        // RCLCPP_INFO_STREAM(logger_,"Sent: " << msg_to_send);
-        // RCLCPP_INFO_STREAM(logger_,"Received: " << response);
-    }
+    RCLCPP_INFO(rclcpp::get_logger("ArduinoComms"), 
+                "TX: %s | RX: %s", msg_to_send.c_str(), response.c_str());
+    
+    
 
     return response;
 }

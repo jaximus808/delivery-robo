@@ -15,6 +15,8 @@
 using hardware_interface::CallbackReturn;
 using hardware_interface::return_type;
 
+namespace ackdrive_arduino  // ADD THIS!
+{
 class AckDriveArduino : public hardware_interface::SystemInterface {
 public:
     AckDriveArduino();
@@ -46,5 +48,5 @@ private:
     rclcpp::Logger logger_;
     std::chrono::time_point<std::chrono::system_clock> time_;
 };
-
+}
 #endif // ACKDRIVE_ARDUINO_REAL_ROBOT_H
