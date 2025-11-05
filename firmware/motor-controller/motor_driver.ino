@@ -12,6 +12,23 @@ PID turn_control(&turn_input, &turn_output, &turn_target, KP_T, KI_T, KD_T, DIRE
 
 
 void setMotorPWM(int motor, int pwm) {
+    // Reverse direction and pwm if negative
+    int dir = HIGH;
+    if (pwm < 0) {
+        pwm = -pwm;
+        dir = LOW;
+    }
+
+    // Set motor direction
+    if (motor == DRIVE_MOTOR) {
+        digitalWrite(DRIVE_MOTOR_IN1, dir);
+        digitalWrite(DRIVE_MOTOR_IN2, abs(dir-1)); // opposite of dir
+    } else if (motor == TURN_MOTOR) {
+        digitalWrite(TURN_MOTOR_IN1, HIGH);
+        digitalWrite(TURN_MOTOR_IN2, abs(dir-1));
+    }
+
+    // Write pwm
     analogWrite(motor, pwm);
 }
 
@@ -24,13 +41,19 @@ void setTurnAngle(double angle) {
 }
 
 void motorInit() {
-    vel_input = getDriveVel();
-    vel_target = vel_input;
-    vel_control.SetMode(AUTOMATIC);
+    pinMode(DRIVE_MOTOR_IN1, OUTPUT);
+    pinMode(DRIVE_MOTOR_IN2, OUTPUT);
+    pinMode(DRIVE_MOTOR_EN, OUTPUT);
 
-    turn_input = getTurnAngle();
-    turn_target = turn_input;
-    turn_control.SetMode(AUTOMATIC);
+    // vel_input = getDriveVel();
+    // vel_target = vel_input;
+    // vel_control.SetMode(AUTOMATIC);
+    // vel_control.SetOutputLimits(-240, 240); // probably a good idea to limit pwm a bit below max?
+
+    // turn_input = getTurnAngle();
+    // turn_target = turn_input;
+    // turn_control.SetMode(AUTOMATIC);
+    // turn_control.SetOutputLimits(-240, 240);
 }
 
 void motorUpdate() {
