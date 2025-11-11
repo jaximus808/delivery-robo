@@ -1,6 +1,10 @@
+// Motor ids
+#define DRIVE_MOTOR 0
+#define TURN_MOTOR 1
+
 // Motor pins
-#define DRIVE_MOTOR_IN1 2
-#define DRIVE_MOTOR_IN2 3
+#define DRIVE_MOTOR_IN1 6
+#define DRIVE_MOTOR_IN2 7
 #define DRIVE_MOTOR_PWM 5
 #define TURN_SERVO 10
 
@@ -12,7 +16,7 @@
 #define KD_T 1
 
 
-void setMotorPWM(int motor, int pwm);
+void setDriveSpeed(int pwm);
 
 void setDriveVel(double speed);
 

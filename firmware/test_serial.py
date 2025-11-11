@@ -18,7 +18,7 @@ try:
         cmd = input(">>> ")  # user input
         if cmd.lower() in ("exit", "quit"):
             break
-        ser.write((cmd + "").encode())  # send to Arduino
+        ser.write((cmd + "\r").encode())  # send to Arduino
 
         time.sleep(0.1)  # short delay for response
         while ser.in_waiting:
