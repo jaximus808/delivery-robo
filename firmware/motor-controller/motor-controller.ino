@@ -22,6 +22,7 @@ void setup() {
   Serial.begin(BAUDRATE);
   // pinMode(LED_BUILTIN, OUTPUT);
   motorInit(); // initialize motors
+  encoderInit(); //initialize encoder
 }
 
 void loop() {
@@ -53,11 +54,9 @@ void runCommand() {
       // TODO: parse colon-delimited values and call setPidValues()
       break;
 
-    // case GET_ENCODER: // "e"
-    //   Serial.print(getDriveVel());
-    //   Serial.print(" ");
-    //   Serial.println(getTurnAngle());
-    //   break;
+    case GET_ENCODER: // "e"
+      Serial.print(getEncoder());
+      break;
 
     case TEST_BLINK_ON: // "o"
       digitalWrite(LED_BUILTIN, HIGH);
