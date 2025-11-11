@@ -86,8 +86,6 @@
         <material>Gazebo/Orange</material>
     </gazebo>
 
-    
-
     <!-- front left steering -->
 
     <link name="front_left_wheel">

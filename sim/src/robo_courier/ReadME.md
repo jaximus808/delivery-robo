@@ -20,6 +20,12 @@ make sure to change frame to base link, and add tf topic
 
 ## NEW UPDATED RUN with ackerman
 
+### Real Robot
+
+run real control with robot
+
+ros2 launch robo_courier launch_real_robot.launch.py
+
 ### launch sim
 
 ros2 launch robo_courier launch_sim.launch.py 

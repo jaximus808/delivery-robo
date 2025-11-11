@@ -1,46 +1,46 @@
-#include "PID_v1.h"
-
+// #include "PID_v1.h"
 #include "motor_driver.h"
 #include "encoder_driver.h"
+#include <Servo.h>  // Add this!
 
+Servo turnServo;  // Create servo object
 
 double vel_input, vel_output, vel_target;
 double turn_input, turn_output, turn_target;
 
-PID vel_control(&vel_input, &vel_output, &vel_target, KP_V, KI_V, KD_V, DIRECT);
-PID turn_control(&turn_input, &turn_output, &turn_target, KP_T, KI_T, KD_T, DIRECT);
+// PID vel_control(&vel_input, &vel_output, &vel_target, KP_V, KI_V, KD_V, DIRECT);
+// PID turn_control(&turn_input, &turn_output, &turn_target, KP_T, KI_T, KD_T, DIRECT);
 
 
-void setMotorPWM(int motor, int pwm) {
-    // Reverse direction and pwm if negative
-    int dir = HIGH;
-    if (pwm < 0) {
-        pwm = -pwm;
-        dir = LOW;
+void setDriveSpeed(int pwm) {
+    
+    if (pwm > 0) {
+        digitalWrite(DRIVE_MOTOR_IN1, HIGH);
+        digitalWrite(DRIVE_MOTOR_IN2, LOW);
+        analogWrite(DRIVE_MOTOR_PWM, constrain(pwm, 0, 255));
+
+        Serial.print("mepoowParsed - Vel: ");
+        Serial.print(constrain(pwm, 0, 255));
+        Serial.print(" | Angle: ");
+        Serial.println(arg2);
+    } else if (pwm < 0) {
+        digitalWrite(DRIVE_MOTOR_IN1, LOW);
+        digitalWrite(DRIVE_MOTOR_IN2, HIGH);
+        analogWrite(DRIVE_MOTOR_PWM, constrain(-pwm*2, 0, 255));
+    } else {
+        digitalWrite(DRIVE_MOTOR_IN1, LOW);
+        digitalWrite(DRIVE_MOTOR_IN2, LOW);
+        analogWrite(DRIVE_MOTOR_PWM, 0);
     }
-
-    // Set motor direction
-    if (motor == DRIVE_MOTOR) {
-        digitalWrite(DRIVE_MOTOR_IN1, dir);
-        digitalWrite(DRIVE_MOTOR_IN2, abs(dir-1)); // opposite of dir
-    } else if (motor == TURN_MOTOR) {
-        digitalWrite(TURN_MOTOR_IN1, HIGH);
-        digitalWrite(TURN_MOTOR_IN2, abs(dir-1));
-    }
-
-    // Write pwm
-    analogWrite(motor, pwm);
 }
 
-void setDriveVel(double speed) {
-    vel_target = speed;
-}
 
-void setTurnAngle(double angle) {
-    turn_target = angle;
+void setTurnAngle(int angle) {
+    turnServo.write(constrain(angle, 0, 180));
 }
 
 void motorInit() {
+    pinMode(DRIVE_MOTOR_PWM, OUTPUT);
     pinMode(DRIVE_MOTOR_IN1, OUTPUT);
     pinMode(DRIVE_MOTOR_IN2, OUTPUT);
     // digitalWrite(DRIVE_MOTOR_PWM, HIGH);
@@ -51,15 +51,15 @@ void motorInit() {
     // pinMode(TURN_MOTOR_PWM, OUTPUT);
     // pinMode(TURN_MOTOR_IN1, OUTPUT);
     // pinMode(TURN_MOTOR_IN2, OUTPUT);
-    // Serial.println("REAEDY!");
+    Serial.println("REAEDY!");
 }
 
-void motorUpdate() {
-    vel_input = getDriveVel();
-    vel_control.Compute();
-    setMotorPWM(DRIVE_MOTOR, vel_output);
+// void motorUpdate() {
+//     vel_input = getDriveVel();
+//     vel_control.Compute();
+//     setMotorPWM(DRIVE_MOTOR, vel_output);
 
-    turn_input = getTurnAngle();
-    turn_control.Compute();
-    setMotorPWM(TURN_MOTOR, turn_output);
-}
+//     turn_input = getTurnAngle();
+//     turn_control.Compute();
+//     setMotorPWM(TURN_MOTOR, turn_output);
+// }
