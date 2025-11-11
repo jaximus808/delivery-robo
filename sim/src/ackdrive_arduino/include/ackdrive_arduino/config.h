@@ -8,7 +8,7 @@ struct Config {
   std::string right_steer_joint = "right_steer_joint";
   std::string left_rear_wheel_joint = "left_rear_wheel_joint";
   std::string right_rear_wheel_joint = "right_rear_wheel_joint";
-  float loop_rate = 30;
+  float loop_rate = 50;
   std::string device = "/dev/ttyUSB0";
   int baud_rate = 57600;
   int timeout = 1000;

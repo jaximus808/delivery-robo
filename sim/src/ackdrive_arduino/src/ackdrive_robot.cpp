@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     node->declare_parameter<std::string>("device", "/dev/ttyUSB0");
     node->declare_parameter<int>("enc_counts_per_rev", 3436);
     node->declare_parameter<int>("timeout", 1000);
-    node->declare_parameter<double>("robot_loop_rate", 30.0);
+    node->declare_parameter<double>("robot_loop_rate", 50.0);
 
     std::string left_steer_joint = node->get_parameter("left_steer_joint").as_string();
     std::string right_steer_joint = node->get_parameter("right_steer_joint").as_string();

@@ -85,7 +85,6 @@ def generate_launch_description():
             )
         ]),
         launch_arguments={
-            'world': world_file,
             "publish_rate": "400.0",
         }.items()
     )
