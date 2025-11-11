@@ -43,17 +43,15 @@ void setTurnAngle(double angle) {
 void motorInit() {
     pinMode(DRIVE_MOTOR_IN1, OUTPUT);
     pinMode(DRIVE_MOTOR_IN2, OUTPUT);
-    pinMode(DRIVE_MOTOR_EN, OUTPUT);
-
-    // vel_input = getDriveVel();
-    // vel_target = vel_input;
-    // vel_control.SetMode(AUTOMATIC);
-    // vel_control.SetOutputLimits(-240, 240); // probably a good idea to limit pwm a bit below max?
-
-    // turn_input = getTurnAngle();
-    // turn_target = turn_input;
-    // turn_control.SetMode(AUTOMATIC);
-    // turn_control.SetOutputLimits(-240, 240);
+    // digitalWrite(DRIVE_MOTOR_PWM, HIGH);
+    digitalWrite(TURN_SERVO, LOW);  // Ensure LOW before attach
+    delay(100);
+    turnServo.attach(TURN_SERVO);
+    turnServo.write(90); 
+    // pinMode(TURN_MOTOR_PWM, OUTPUT);
+    // pinMode(TURN_MOTOR_IN1, OUTPUT);
+    // pinMode(TURN_MOTOR_IN2, OUTPUT);
+    // Serial.println("REAEDY!");
 }
 
 void motorUpdate() {
