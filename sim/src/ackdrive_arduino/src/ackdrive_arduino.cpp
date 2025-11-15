@@ -146,32 +146,37 @@ return_type AckDriveArduino::read(const rclcpp::Time & time, const rclcpp::Durat
     time_ = new_time;
 
     // When Arduino is ready:
-    // if (!arduino_.connected())
-    // {
-    //     return return_type::ERROR;
-    // }
+     if (!arduino_.connected())
+     {
+         return return_type::ERROR;
+     }
+
 
     // Read encoder values for all 4 joints from Arduino
-    // arduino_.readEncoderValues(left_steer_.enc, right_steer_.enc, 
-    //                            left_rear_wheel_.enc, right_rear_wheel_.enc);
+     arduino_.readEncoderValues(left_steer_.enc, right_steer_.enc, 
+                                left_rear_wheel_.enc, right_rear_wheel_.enc);
+
+    
+    RCLCPP_INFO(logger_, "Encoder Value: %d", 
+                left_rear_wheel_.enc);
 
     // Update steering positions and velocities
-    // double pos_prev = left_steer_.pos;
-    // left_steer_.pos = left_steer_.calcEncAngle();
-    // left_steer_.vel = (left_steer_.pos - pos_prev) / deltaSeconds;
+     double pos_prev = left_steer_.pos;
+     left_steer_.pos = left_steer_.calcEncAngle();
+     left_steer_.vel = (left_steer_.pos - pos_prev) / deltaSeconds;
 
-    // pos_prev = right_steer_.pos;
-    // right_steer_.pos = right_steer_.calcEncAngle();
-    // right_steer_.vel = (right_steer_.pos - pos_prev) / deltaSeconds;
+     pos_prev = right_steer_.pos;
+     right_steer_.pos = right_steer_.calcEncAngle();
+     right_steer_.vel = (right_steer_.pos - pos_prev) / deltaSeconds;
 
-    // Update rear wheel positions and velocities
-    // pos_prev = left_rear_wheel_.pos;
-    // left_rear_wheel_.pos = left_rear_wheel_.calcEncAngle();
-    // left_rear_wheel_.vel = (left_rear_wheel_.pos - pos_prev) / deltaSeconds;
+     //Update rear wheel positions and velocities
+     pos_prev = left_rear_wheel_.pos;
+     left_rear_wheel_.pos = left_rear_wheel_.calcEncAngle();
+     left_rear_wheel_.vel = (left_rear_wheel_.pos - pos_prev) / deltaSeconds;
 
-    // pos_prev = right_rear_wheel_.pos;
-    // right_rear_wheel_.pos = right_rear_wheel_.calcEncAngle();
-    // right_rear_wheel_.vel = (right_rear_wheel_.pos - pos_prev) / deltaSeconds;
+     pos_prev = right_rear_wheel_.pos;
+     right_rear_wheel_.pos = right_rear_wheel_.calcEncAngle();
+     right_rear_wheel_.vel = (right_rear_wheel_.pos - pos_prev) / deltaSeconds;
 
     return return_type::OK;
 }
@@ -249,6 +254,15 @@ return_type AckDriveArduino::write(const rclcpp::Time & time, const rclcpp::Dura
     RCLCPP_INFO(logger_, "Avg Rear Vel: %.4f rad/s | Linear: %.3f m/s | PWM: %d", 
                 avg_rear_velocity, linear_speed, pwm);
     RCLCPP_INFO(logger_, "Servo Angle: %.2f deg", servo_angle);
+
+    RCLCPP_INFO(logger_, "Left Steering Encoder Value:  %.4f rad (%.2f deg)", 
+                left_steer_.enc);
+    RCLCPP_INFO(logger_, "Right Steering Encoder Value:  %.4f rad (%.2f deg)", 
+               right_steer_.enc);
+    RCLCPP_INFO(logger_, "Left Rear Wheel Encoder Value:  %.4f rad (%.2f deg)", 
+                 left_rear_wheel_.enc);
+    RCLCPP_INFO(logger_, "Right Rear Wheel Encoder Value:  %.4f rad (%.2f deg)", 
+              right_rear_wheel_.enc);
     RCLCPP_INFO(logger_, "===================================");
     
     // Send to Arduino

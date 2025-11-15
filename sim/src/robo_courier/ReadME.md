@@ -22,9 +22,15 @@ make sure to change frame to base link, and add tf topic
 
 ### Real Robot
 
-run real control with robot
+run real control with robot using an2 and RPP
 
 ros2 launch robo_courier launch_real_robot.launch.py
+
+## Real Teleop robot
+
+use this to run the robot with a joystick
+
+ros2 launch robo_courier launch_teleop_robot.launch.py
 
 ### launch sim
 
