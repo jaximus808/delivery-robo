@@ -9,13 +9,13 @@
 #define I2C_ADDR          0x27    // Change to your LCD address (use I2C scanner)
 #define ANALOG_PIN        A0      // Voltage divider input
 #define LED_PIN           13      // Low battery warning LED
-#define HIGH_VOLTAGE      .7
-#define MED_VOLTAGE       .35    // Low battery threshold (volts)
-#define VOLTAGE_DIVIDER   3.0     // Divider ratio (both resistors equal = 2.0)
+#define HIGH_VOLTAGE      0.7
+#define MED_VOLTAGE       0.35    // Low battery threshold (volts)
+#define VOLTAGE_DIVIDER   5.7     // Divider ratio (both resistors equal = 2.0)
 #define SAMPLES           10      // Number of readings to average
 #define SAMPLE_DELAY      10      // Delay between samples (ms)
 #define UPDATE_INTERVAL   500     // Display update interval (ms)
-#define Battery_MAX       12      // Total Battery Value (V)
+#define Battery_MAX       24      // Total Battery Value (V)             
 // Initialize LCD (address, columns, rows)
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
@@ -67,7 +67,6 @@ float readVoltage() {
   // Arduino ADC: 0-1023 represents 0-5V
   // Multiply by divider ratio to get actual battery voltage
   float voltage = (average * 5.0 / 1023.0) * VOLTAGE_DIVIDER;
-  
   return voltage;
 }
 
