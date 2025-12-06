@@ -14,24 +14,32 @@ double turn_input, turn_output, turn_target;
 
 void setDriveSpeed(int pwm) {
     
-    if (pwm > 0) {
-        digitalWrite(DRIVE_MOTOR_IN1, HIGH);
-        digitalWrite(DRIVE_MOTOR_IN2, LOW);
-        analogWrite(DRIVE_MOTOR_PWM, constrain(pwm, 0, 255));
+    // if (pwm > 0) {
+    //     digitalWrite(DRIVE_MOTOR_IN1, HIGH);
+    //     digitalWrite(DRIVE_MOTOR_IN2, LOW);
+    //     analogWrite(DRIVE_MOTOR_PWM, constrain(pwm, 0, 255));
 
-        Serial.print("mepoowParsed - Vel: ");
-        Serial.print(constrain(pwm, 0, 255));
-        Serial.print(" | Angle: ");
-        Serial.println(arg2);
-    } else if (pwm < 0) {
-        digitalWrite(DRIVE_MOTOR_IN1, LOW);
-        digitalWrite(DRIVE_MOTOR_IN2, HIGH);
-        analogWrite(DRIVE_MOTOR_PWM, constrain(-pwm*2, 0, 255));
-    } else {
-        digitalWrite(DRIVE_MOTOR_IN1, LOW);
-        digitalWrite(DRIVE_MOTOR_IN2, LOW);
-        analogWrite(DRIVE_MOTOR_PWM, 0);
+    //     Serial.print("mepoowParsed - Vel: ");
+    //     Serial.print(constrain(pwm, 0, 255));
+    //     Serial.print(" | Angle: ");
+    //     Serial.println(arg2);
+    // } else if (pwm < 0) {
+    //     digitalWrite(DRIVE_MOTOR_IN1, LOW);
+    //     digitalWrite(DRIVE_MOTOR_IN2, HIGH);
+    //     analogWrite(DRIVE_MOTOR_PWM, constrain(-pwm*2, 0, 255));
+    // } else {
+    //     digitalWrite(DRIVE_MOTOR_IN1, LOW);
+    //     digitalWrite(DRIVE_MOTOR_IN2, LOW);
+    //     analogWrite(DRIVE_MOTOR_PWM, 0);
+    // }
+
+    // Cytron (24v) motor driver
+    if (pwm < 0) {
+        // Set motor to reverse and make pwm positive
+        digitalWrite(DRIVE_MOTOR_DIR, LOW);
+        pwm = -pwm;
     }
+    analogWrite(DRIVE_MOTOR_PWM, constrain(pwm, 0, 255));
 }
 
 
@@ -41,8 +49,9 @@ void setTurnAngle(int angle) {
 
 void motorInit() {
     pinMode(DRIVE_MOTOR_PWM, OUTPUT);
-    pinMode(DRIVE_MOTOR_IN1, OUTPUT);
-    pinMode(DRIVE_MOTOR_IN2, OUTPUT);
+    pinMode(DRIVE_MOTOR_DIR, OUTPUT);
+    // pinMode(DRIVE_MOTOR_IN1, OUTPUT);
+    // pinMode(DRIVE_MOTOR_IN2, OUTPUT);
     // digitalWrite(DRIVE_MOTOR_PWM, HIGH);
     digitalWrite(TURN_SERVO, LOW);  // Ensure LOW before attach
     delay(100);
