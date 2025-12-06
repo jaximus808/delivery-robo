@@ -1,5 +1,6 @@
 #include "commands.h"
 #include "motor_driver.h"
+#include "battery.h"
 
 #define BAUDRATE 57600
 
@@ -23,10 +24,12 @@ void setup() {
   // pinMode(LED_BUILTIN, OUTPUT);
   motorInit(); // initialize motors
   encoderInit(); //initialize encoder
+  batteryInit();
 }
 
 void loop() {
   processBuffer();
+  batteryUpdate();
   // motorUpdate(); // keep PID running
 }
 
@@ -56,6 +59,10 @@ void runCommand() {
 
     case GET_ENCODER: // "e"
       Serial.print(getEncoder());
+      break;
+    
+    case GET_BATTERY: // "b"
+      Serial.print(readVoltage());
       break;
 
     case TEST_BLINK_ON: // "o"
