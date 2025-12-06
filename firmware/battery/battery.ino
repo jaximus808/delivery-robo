@@ -11,11 +11,11 @@
 #define LED_PIN           13      // Low battery warning LED
 #define HIGH_VOLTAGE      .7
 #define MED_VOLTAGE       .35    // Low battery threshold (volts)
-#define VOLTAGE_DIVIDER   2.0     // Divider ratio (both resistors equal = 2.0)
+#define VOLTAGE_DIVIDER   3.0     // Divider ratio (both resistors equal = 2.0)
 #define SAMPLES           10      // Number of readings to average
 #define SAMPLE_DELAY      10      // Delay between samples (ms)
 #define UPDATE_INTERVAL   500     // Display update interval (ms)
-#define Battery_MAX     22.5      // Total Battery Value (V)
+#define Battery_MAX       12      // Total Battery Value (V)
 // Initialize LCD (address, columns, rows)
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
@@ -79,9 +79,13 @@ void displayVoltage(float voltage) {
   lcd.setCursor(0, 1);
   lcd.print("   ");  // Clear previous value
   lcd.setCursor(0, 1);
-  lcd.print((voltage/Battery_MAX)*100, 2);  // Show 2 decimal places
-  lcd.print(" %    ");    // Extra spaces to clear old characters
-  
+  if(((voltage/Battery_MAX)*100) > 1){
+    lcd.print(100);
+    lcd.print(" %    ");
+  }else{
+    lcd.print((voltage/Battery_MAX)*100, 2);  // Show 2 decimal places
+    lcd.print(" %    ");    // Extra spaces to clear old characters
+  }
   // Show battery status high,med,low
   lcd.setCursor(10, 1);
   if ((voltage/Battery_MAX) >= HIGH_VOLTAGE) { //Above or at 0.7
