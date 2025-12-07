@@ -85,81 +85,74 @@ def generate_launch_description():
     )
 
     # --- ros2_control_node (Controller Manager) ---
-    # controller_manager = Node(
-    #     package="controller_manager",
-    #     executable="ros2_control_node",
-    #     parameters=[
-    #         {'robot_description': robot_description},
-    #         os.path.join(
-    #             get_package_share_directory(package_name),
-    #             'config',
-    #             'my_controllers.yaml'
-    #         ),
-    #         {'use_sim_time': False}
-    #     ],
-    #     output="screen"
-    # )
-
     controller_manager = Node(
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
             {'robot_description': robot_description},
-            os.path.join(get_package_share_directory(package_name), 'config', 'my_controllers.yaml'),
+            os.path.join(
+                get_package_share_directory(package_name),
+                'config',
+                'my_controllers.yaml'
+            ),
             {'use_sim_time': False}
         ],
         output="screen"
     )
 
-    # 2. Spawners (just definitions, not launching yet)
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_broad", "--controller-manager-timeout", "120"], # Wait up to 120s!
-        output="screen"
-    )
 
+    # --- Spawners ---
     ack_drive_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["ack_cont", "--controller-manager-timeout", "120"],
+        arguments=["ack_cont", "--controller-manager-timeout", "60"],
         output="screen"
     )
 
-    # 3. The "Snooze Button" (TimerAction)
-    # This forces ROS to wait 10 seconds before even TRYING to spawn the joint broadcaster
-    # This gives the heavy Manager node on the Pi time to initialize.
-    delayed_joint_broad_spawner = TimerAction(
-        period=10.0, 
-        actions=[joint_broad_spawner]
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_broad", "--controller-manager-timeout", "60"],
+        output="screen"
     )
 
-    # 4. Chain the Ackermann Spawner
-    # Only try to spawn the drive controller after the joint broadcaster succeeds
+    # Spawn controllers *after* controller_manager starts
+    # Increased delay from 2.0 to 5.0 seconds to ensure controller_manager is fully initialized
+    delayed_spawners = TimerAction(
+        period=1.0,
+        actions=[joint_broad_spawner]
+    )
+    
+
     ack_drive_spawner_event = RegisterEventHandler(
+    
         event_handler=OnProcessStart(
             target_action=joint_broad_spawner,
-            on_start=[ack_drive_spawner]
+            on_start=[
+                TimerAction(period=1.0, actions=[ack_drive_spawner])
+            ]
         )
     )
 
-    # controller_manager_cmd = ExecuteProcess(
-    #     cmd=[
-    #         'ros2', 'run', 'controller_manager', 'ros2_control_node',
-    #     ],
-    #     output='screen'
-    # )
-
-
-    # ros2_control_node = RegisterEventHandler(
     
-    #     event_handler=OnProcessStart(
-    #         target_action=ack_drive_spawner,
-    #         on_start=[
-    #             TimerAction(period=1.0, actions=[controller_manager_cmd])
-    #         ]
-    #     )
-    # )
+
+    controller_manager_cmd = ExecuteProcess(
+        cmd=[
+            'ros2', 'run', 'controller_manager', 'ros2_control_node',
+        ],
+        output='screen'
+    )
+
+
+    ros2_control_node = RegisterEventHandler(
+    
+        event_handler=OnProcessStart(
+            target_action=ack_drive_spawner,
+            on_start=[
+                TimerAction(period=1.0, actions=[controller_manager_cmd])
+            ]
+        )
+    )
 
     return LaunchDescription([
         use_sim_time_arg,
@@ -168,7 +161,7 @@ def generate_launch_description():
         twist_mux,
         twist_stamp,
         controller_manager,
-        delayed_joint_broad_spawner,
+        delayed_spawners,
         ack_drive_spawner_event,
-        # ros2_control_node,
+        ros2_control_node,
     ])
