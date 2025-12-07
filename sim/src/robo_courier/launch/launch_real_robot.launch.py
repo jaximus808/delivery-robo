@@ -163,5 +163,5 @@ def generate_launch_description():
         controller_manager,
         delayed_spawners,
         ack_drive_spawner_event,
-        ros2_control_node,
+        # ros2_control_node,
     ])
