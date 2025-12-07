@@ -136,23 +136,23 @@ def generate_launch_description():
 
     
 
-    controller_manager_cmd = ExecuteProcess(
-        cmd=[
-            'ros2', 'run', 'controller_manager', 'ros2_control_node',
-        ],
-        output='screen'
-    )
+    # controller_manager_cmd = ExecuteProcess(
+    #     cmd=[
+    #         'ros2', 'run', 'controller_manager', 'ros2_control_node',
+    #     ],
+    #     output='screen'
+    # )
 
 
-    ros2_control_node = RegisterEventHandler(
+    # ros2_control_node = RegisterEventHandler(
     
-        event_handler=OnProcessStart(
-            target_action=ack_drive_spawner,
-            on_start=[
-                TimerAction(period=1.0, actions=[controller_manager_cmd])
-            ]
-        )
-    )
+    #     event_handler=OnProcessStart(
+    #         target_action=ack_drive_spawner,
+    #         on_start=[
+    #             TimerAction(period=1.0, actions=[controller_manager_cmd])
+    #         ]
+    #     )
+    # )
 
     return LaunchDescription([
         use_sim_time_arg,
