@@ -58,7 +58,7 @@ void runCommand() {
       break;
 
     case GET_ENCODER: // "e"
-      Serial.print(getEncoder());
+      Serial.println(getEncoder());
       break;
     
     case GET_BATTERY: // "b"

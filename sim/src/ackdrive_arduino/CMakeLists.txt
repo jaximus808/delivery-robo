@@ -12,6 +12,7 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(serial REQUIRED)
+find_package(arduino_comms REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(controller_manager REQUIRED)
 find_package(rclcpp REQUIRED)
@@ -20,7 +21,6 @@ find_package(pluginlib REQUIRED)
 add_library(ackdrive_arduino SHARED 
   src/ackdrive_arduino.cpp 
   src/wheel.cpp 
-  src/arduino_comms.cpp
 )
 
 target_include_directories(
@@ -34,6 +34,7 @@ ament_target_dependencies(
   hardware_interface
   controller_manager
   serial
+  arduino_comms
   rclcpp
   pluginlib
 )
@@ -51,5 +52,5 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
-
+ament_export_include_directories(include)
 ament_package()

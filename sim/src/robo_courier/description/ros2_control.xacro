@@ -13,7 +13,7 @@
         <param name="left_rear_wheel_joint">left_rear_wheel_joint</param>
         <param name="right_rear_wheel_joint">right_rear_wheel_joint</param>
         
-        <param name="loop_rate">30</param>
+        <param name="loop_rate">50</param>
         <param name="device">/dev/ttyUSB0</param>
         <param name="baud_rate">57600</param>
         <param name="timeout">1000</param>
@@ -29,8 +29,7 @@
         <state_interface name="position"/>
         <state_interface name="velocity"/>
       </joint>
-      
-      <!-- Front Right Steering -->
+
       <joint name="right_wheel_hinge">
         <command_interface name="position">
           <param name="min">-0.6</param>
@@ -39,8 +38,7 @@
         <state_interface name="position"/>
         <state_interface name="velocity"/>
       </joint>
-      
-      <!-- Rear Left Drive Wheel -->
+
       <joint name="left_rear_wheel_joint">
         <command_interface name="velocity">
           <param name="min">-10</param>
@@ -50,7 +48,6 @@
         <state_interface name="velocity"/>
       </joint>
       
-      <!-- Rear Right Drive Wheel -->
       <joint name="right_rear_wheel_joint">
         <command_interface name="velocity">
           <param name="min">-10</param>
