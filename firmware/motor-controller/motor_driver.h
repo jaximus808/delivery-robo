@@ -3,8 +3,9 @@
 #define TURN_MOTOR 1
 
 // Motor pins
-#define DRIVE_MOTOR_IN1 6
-#define DRIVE_MOTOR_IN2 7
+// #define DRIVE_MOTOR_IN1 6
+// #define DRIVE_MOTOR_IN2 7
+#define DRIVE_MOTOR_DIR 6
 #define DRIVE_MOTOR_PWM 5
 #define TURN_SERVO 10
 

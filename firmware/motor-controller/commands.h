@@ -14,6 +14,7 @@
 
 // Sensors / testing
 #define GET_ENCODER 'e'
+#define GET_BATTERY 'b'
 #define TEST_BLINK_ON 'o'
 #define TEST_BLINK_OFF 'f'
 
