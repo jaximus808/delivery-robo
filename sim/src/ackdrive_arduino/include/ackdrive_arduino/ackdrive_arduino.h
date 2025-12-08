@@ -8,7 +8,7 @@
 #include "hardware_interface/hardware_info.hpp"
 #include "hardware_interface/system_interface.hpp"
 #include "hardware_interface/types/hardware_interface_return_values.hpp"
-#include "arduino_comms.h"
+#include "arduino_comms/arduino_comms.h"
 #include "config.h"
 #include "wheel.h"
 

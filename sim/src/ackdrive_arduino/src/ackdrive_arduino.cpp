@@ -146,32 +146,32 @@ return_type AckDriveArduino::read(const rclcpp::Time & time, const rclcpp::Durat
     time_ = new_time;
 
     // When Arduino is ready:
-    // if (!arduino_.connected())
-    // {
-    //     return return_type::ERROR;
-    // }
+     if (!arduino_.connected())
+     {
+         return return_type::ERROR;
+     }
 
-    // Read encoder values for all 4 joints from Arduino
-    // arduino_.readEncoderValues(left_steer_.enc, right_steer_.enc, 
-    //                            left_rear_wheel_.enc, right_rear_wheel_.enc);
+
+    // Read encoder value from Arduino
+     arduino_.readEncoderValues(left_steer_.enc);
 
     // Update steering positions and velocities
-    // double pos_prev = left_steer_.pos;
-    // left_steer_.pos = left_steer_.calcEncAngle();
-    // left_steer_.vel = (left_steer_.pos - pos_prev) / deltaSeconds;
+     double pos_prev = left_steer_.pos;
+     left_steer_.pos = left_steer_.calcEncAngle();
+     left_steer_.vel = (left_steer_.pos - pos_prev) / deltaSeconds;
 
-    // pos_prev = right_steer_.pos;
-    // right_steer_.pos = right_steer_.calcEncAngle();
-    // right_steer_.vel = (right_steer_.pos - pos_prev) / deltaSeconds;
+     pos_prev = right_steer_.pos;
+     right_steer_.pos = right_steer_.calcEncAngle();
+     right_steer_.vel = (right_steer_.pos - pos_prev) / deltaSeconds;
 
-    // Update rear wheel positions and velocities
-    // pos_prev = left_rear_wheel_.pos;
-    // left_rear_wheel_.pos = left_rear_wheel_.calcEncAngle();
-    // left_rear_wheel_.vel = (left_rear_wheel_.pos - pos_prev) / deltaSeconds;
+     //Update rear wheel positions and velocities
+     pos_prev = left_rear_wheel_.pos;
+     left_rear_wheel_.pos = left_rear_wheel_.calcEncAngle();
+     left_rear_wheel_.vel = (left_rear_wheel_.pos - pos_prev) / deltaSeconds;
 
-    // pos_prev = right_rear_wheel_.pos;
-    // right_rear_wheel_.pos = right_rear_wheel_.calcEncAngle();
-    // right_rear_wheel_.vel = (right_rear_wheel_.pos - pos_prev) / deltaSeconds;
+     pos_prev = right_rear_wheel_.pos;
+     right_rear_wheel_.pos = right_rear_wheel_.calcEncAngle();
+     right_rear_wheel_.vel = (right_rear_wheel_.pos - pos_prev) / deltaSeconds;
 
     return return_type::OK;
 }
@@ -184,43 +184,60 @@ return_type AckDriveArduino::write(const rclcpp::Time & time, const rclcpp::Dura
     const double WHEEL_RADIUS = WHEEL_DIAMETER / 2.0;
     const double MAX_LINEAR_SPEED = 2.0;  // m/s (adjust based on your setup)
     const double MAX_ANGULAR_SPEED = MAX_LINEAR_SPEED / WHEEL_RADIUS; // rad/s
-
+    
     double virtual_steering_angle = 0.0;
     
     if (std::abs(left_steer_.cmd) > 0.001 || std::abs(right_steer_.cmd) > 0.001) 
     {
+        // Use the angle with the larger absolute value (the inner wheel)
         double inner_angle = (std::abs(left_steer_.cmd) > std::abs(right_steer_.cmd)) ? 
-                             left_steer_.cmd : right_steer_.cmd;
-
-        double tan_inner = std::tan(inner_angle);
-        double R_center = WHEELBASE / tan_inner + (TRACK_WIDTH / 2.0) * (inner_angle / std::abs(inner_angle));
-        virtual_steering_angle = std::atan2(WHEELBASE, R_center);
+                              left_steer_.cmd : right_steer_.cmd;
+        
+        // Preserve the sign of the steering angle
+        double sign = (inner_angle >= 0) ? 1.0 : -1.0;
+        double abs_inner_angle = std::abs(inner_angle);
+        
+        double tan_inner = std::tan(abs_inner_angle);
+        
+        if (std::abs(tan_inner) > 0.001) {
+            double R_center = WHEELBASE / tan_inner;
+            virtual_steering_angle = std::atan2(WHEELBASE, R_center) * sign;
+        } else {
+            virtual_steering_angle = 0.0;
+        }
     }
     else
     {
         virtual_steering_angle = 0.0;
     }
-
+    
     const double MIN_SERVO_ANGLE = 45.0;
     const double MAX_SERVO_ANGLE = 135.0;
     const double CENTER_SERVO_ANGLE = 90.0;
     const double MAX_STEERING_ANGLE = 0.52; // ~30 degrees in radians
-
-    double servo_angle = CENTER_SERVO_ANGLE + 
-                         (virtual_steering_angle / MAX_STEERING_ANGLE) * 
-                         ((MAX_SERVO_ANGLE - MIN_SERVO_ANGLE) / 2.0);
+    
+    // Calculate servo angle - properly handles negative angles
+    double steering_ratio = virtual_steering_angle / MAX_STEERING_ANGLE;
+    // Clamp the ratio to [-1.0, 1.0] to prevent exceeding servo limits
+    steering_ratio = std::max(-1.0, std::min(1.0, steering_ratio));
+    
+    // Map steering ratio to servo angle range
+    // -1.0 → 45°, 0.0 → 90°, +1.0 → 135°
+    double servo_angle = CENTER_SERVO_ANGLE + steering_ratio * (CENTER_SERVO_ANGLE - MIN_SERVO_ANGLE);
+    
+    // Safety clamp (should already be in range, but good practice)
     servo_angle = std::max(MIN_SERVO_ANGLE, std::min(MAX_SERVO_ANGLE, servo_angle));
-
+    
     double avg_rear_velocity = (left_rear_wheel_.cmd + right_rear_wheel_.cmd) / 2.0;
-
+    
     // === Convert angular velocity (rad/s) → PWM ===
     // PWM proportional to desired wheel linear speed
     double linear_speed = avg_rear_velocity * WHEEL_RADIUS; // m/s
     int pwm = static_cast<int>((linear_speed / MAX_LINEAR_SPEED) * 255.0);
-
+    
     // Clamp to valid PWM range
     pwm = std::max(-255, std::min(255, pwm));
-
+    
     RCLCPP_INFO(logger_, "=== Ackermann Steering Commands ===");
     RCLCPP_INFO(logger_, "Left Steering Angle:  %.4f rad (%.2f deg)", 
                 left_steer_.cmd, left_steer_.cmd * 180.0 / M_PI);
@@ -232,14 +249,14 @@ return_type AckDriveArduino::write(const rclcpp::Time & time, const rclcpp::Dura
     RCLCPP_INFO(logger_, "Avg Rear Vel: %.4f rad/s | Linear: %.3f m/s | PWM: %d", 
                 avg_rear_velocity, linear_speed, pwm);
     RCLCPP_INFO(logger_, "Servo Angle: %.2f deg", servo_angle);
+    RCLCPP_INFO(logger_, "Encoder Value: %d", left_steer_.enc);
     RCLCPP_INFO(logger_, "===================================");
-
+    
     // Send to Arduino
     this->arduino_.setMotorValues(pwm, servo_angle);
-
+    
     return return_type::OK;
 }
-
 }
 #include "pluginlib/class_list_macros.hpp"
 

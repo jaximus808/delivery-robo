@@ -1,13 +1,16 @@
 #include "encoder_driver.h"
 
 
-volatile long encoderValue = 0;    // the current click count
+static volatile long encoderValue = 0;    // the current click count
 unsigned long lastReportTime = 0;  // the last time data was reported to the Pi
 const int reportInterval = 20;     // Report the count every 20 milliseconds
 volatile int8_t lastEncoded = 0;
 
-double getEncoder() {
-  return encoderValue;
+long getEncoder() {
+  noInterrupts();      // prevent updateEncoder() from modifying value mid-read
+  long encoderValueSteady = encoderValue;
+  interrupts();
+  return encoderValueSteady;
 }
 
 void encoderInit() {
@@ -51,11 +54,17 @@ void updateEncoder() {
 
   int sum = (lastEncoded << 2) | encoded;
 
-  if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == sum == 0b1011) {
+  if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) {
     encoderValue++;
   }
-  if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == sum == 0b1000) {
+  if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) {
     encoderValue--;
   }
   lastEncoded = encoded;
+}
+
+void resetEncoder() {
+  noInterrupts();
+  encoderValue = 0;
+  interrupts();
 }
