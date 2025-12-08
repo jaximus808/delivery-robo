@@ -9,6 +9,6 @@ double getDriveVel();
 
 double getTurnAngle();
 
-long getEncoderCount();
+long getEncoder();
 
 void encoderInit();

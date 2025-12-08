@@ -51,7 +51,7 @@ void motorInit() {
     // pinMode(TURN_MOTOR_PWM, OUTPUT);
     // pinMode(TURN_MOTOR_IN1, OUTPUT);
     // pinMode(TURN_MOTOR_IN2, OUTPUT);
-    Serial.println("REAEDY!");
+    //Serial.println("REAEDY!");
 }
 
 // void motorUpdate() {
