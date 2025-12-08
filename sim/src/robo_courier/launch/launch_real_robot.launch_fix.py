@@ -1,7 +1,7 @@
 import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, TimerAction, RegisterEventHandler
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, TimerAction, RegisterEventHandler, ExecuteProcess
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.event_handlers import OnProcessStart
@@ -29,66 +29,50 @@ def generate_launch_description():
         ' sim_mode:=false'
     ])
 
-    # --- Controller Manager (The ONLY one you need) ---
-    # We use output='both' so you can see if the C++ code crashes
-    controller_manager = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[
-            {'robot_description': robot_description},
-            os.path.join(
-                get_package_share_directory(package_name),
-                'config',
-                'my_controllers.yaml'
-            ),
-            {'use_sim_time': False}
-        ],
-        output="both", 
+    use_sim_time = LaunchConfiguration('use_sim_time')
+
+    # --- Config File Path ---
+    controller_params_file = os.path.join(
+        get_package_share_directory(package_name),
+        'config',
+        'my_controllers.yaml'
     )
 
-    # --- Spawners ---
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_broad"],
-        output="screen"
-    )
-
-    ack_drive_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["ack_cont"],
-        output="screen"
-    )
-
-    # --- CRITICAL FIX: The Delay ---
-    # On a Pi, the Controller Manager takes time to open Serial ports and load plugins.
-    # We wait 10 seconds before letting the spawners run.
-    # If this feels too long later, you can reduce it to 5 or 7.
-    delayed_controller_manager_spawner = TimerAction(
-        period=10.0,
-        actions=[
-            joint_broad_spawner,
-            ack_drive_spawner
-        ]
-    )
-
-    # --- Other Nodes (RSP, Joystick, etc) ---
+    # --- Include robot_state_publisher (RSP) ---
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory(package_name), 'launch', 'rsp.launch.py')
+            os.path.join(
+                get_package_share_directory(package_name),
+                'launch',
+                'rsp.launch.py'
+            )
         ]),
-        launch_arguments={'use_sim_time': 'false', 'use_ros2_control': 'true', 'sim_mode': 'false'}.items()
+        launch_arguments={
+            'use_sim_time': 'false',
+            'use_ros2_control': 'true',
+            'sim_mode': 'false'
+        }.items()
     )
 
+    # --- Joystick ---
     joystick = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory(package_name), 'launch', 'joystick.launch.py')
+            os.path.join(
+                get_package_share_directory(package_name),
+                'launch',
+                'joystick.launch.py'
+            )
         ]),
         launch_arguments={'use_sim_time': 'false'}.items()
     )
 
-    twist_mux_params = os.path.join(get_package_share_directory(package_name), 'config', 'twist_mux.yaml')
+    # --- Twist mux ---
+    twist_mux_params = os.path.join(
+        get_package_share_directory(package_name),
+        'config',
+        'twist_mux.yaml'
+    )
+
     twist_mux = Node(
         package="twist_mux",
         executable="twist_mux",
@@ -96,10 +80,77 @@ def generate_launch_description():
         remappings=[('/cmd_vel_out', '/cmd_vel_out_unstamped')]
     )
 
+    # --- Twist to TwistStamped ---
     twist_stamp = Node(
         package="twist_to_twiststamped",
         executable="twist_to_twiststamped_node",
-        parameters=[{'input_topic': '/cmd_vel_out_unstamped', 'output_topic': '/ack_cont/reference', 'frame_id': 'base_link'}]
+        parameters=[{
+            'input_topic': '/cmd_vel_out_unstamped',
+            'output_topic': '/ack_cont/reference',
+            'frame_id': 'base_link'
+        }]
+    )
+
+    # --- ros2_control_node (Controller Manager 1) ---
+    controller_manager = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[
+            {'robot_description': robot_description},
+            controller_params_file,
+            {'use_sim_time': False}
+        ],
+        output="screen"
+    )
+
+    # --- Spawners ---
+    ack_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["ack_cont", "--controller-manager-timeout", "60"],
+        output="screen"
+    )
+
+    joint_broad_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["joint_broad", "--controller-manager-timeout", "60"],
+        output="screen"
+    )
+
+    # Spawn controllers *after* controller_manager starts
+    delayed_spawners = TimerAction(
+        period=1.0,
+        actions=[joint_broad_spawner]
+    )
+
+    ack_drive_spawner_event = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=joint_broad_spawner,
+            on_start=[
+                TimerAction(period=1.0, actions=[ack_drive_spawner])
+            ]
+        )
+    )
+
+    # --- Controller Manager 2 (ExecuteProcess) ---
+    # UPDATED: Added --ros-args --params-file to load the config
+    controller_manager_cmd = ExecuteProcess(
+        cmd=[
+            'ros2', 'run', 'controller_manager', 'ros2_control_node',
+            '--ros-args',
+            '--params-file', controller_params_file
+        ],
+        output='screen'
+    )
+
+    ros2_control_node = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=ack_drive_spawner,
+            on_start=[
+                TimerAction(period=1.0, actions=[controller_manager_cmd])
+            ]
+        )
     )
 
     return LaunchDescription([
@@ -109,5 +160,7 @@ def generate_launch_description():
         twist_mux,
         twist_stamp,
         controller_manager,
-        delayed_controller_manager_spawner
+        delayed_spawners,
+        ack_drive_spawner_event,
+        ros2_control_node,
     ])
