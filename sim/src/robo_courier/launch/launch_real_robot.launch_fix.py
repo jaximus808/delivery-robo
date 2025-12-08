@@ -29,7 +29,8 @@ def generate_launch_description():
         ' sim_mode:=false'
     ])
 
-    # --- Controller Manager (The ONLY one) ---
+    # --- Controller Manager (The ONLY one you need) ---
+    # We use output='both' so you can see if the C++ code crashes
     controller_manager = Node(
         package="controller_manager",
         executable="ros2_control_node",
@@ -42,42 +43,37 @@ def generate_launch_description():
             ),
             {'use_sim_time': False}
         ],
-        output="both", # Changed to 'both' to see C++ crashes
+        output="both", 
     )
 
     # --- Spawners ---
-    # Spawn Joint Broadcaster first
     joint_broad_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["joint_broad", "--controller-manager-timeout", "60"],
+        arguments=["joint_broad"],
         output="screen"
     )
 
-    # Spawn Ackermann Controller AFTER Joint Broadcaster
     ack_drive_spawner = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["ack_cont", "--controller-manager-timeout", "60"],
+        arguments=["ack_cont"],
         output="screen"
     )
 
-    # Delay start of spawners to let Controller Manager spin up
-    delayed_joint_broad_spawner = TimerAction(
-        period=3.0, 
-        actions=[joint_broad_spawner]
+    # --- CRITICAL FIX: The Delay ---
+    # On a Pi, the Controller Manager takes time to open Serial ports and load plugins.
+    # We wait 10 seconds before letting the spawners run.
+    # If this feels too long later, you can reduce it to 5 or 7.
+    delayed_controller_manager_spawner = TimerAction(
+        period=10.0,
+        actions=[
+            joint_broad_spawner,
+            ack_drive_spawner
+        ]
     )
 
-    # Start Ackermann spawner after Joint Broadcaster finishes
-    ack_drive_spawner_event = RegisterEventHandler(
-        event_handler=OnProcessStart(
-            target_action=joint_broad_spawner,
-            on_start=[ack_drive_spawner]
-        )
-    )
-
-    # --- RSP, Joystick, Twist Mux, etc... ---
-    # (Kept these as they were)
+    # --- Other Nodes (RSP, Joystick, etc) ---
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
             os.path.join(get_package_share_directory(package_name), 'launch', 'rsp.launch.py')
@@ -113,6 +109,5 @@ def generate_launch_description():
         twist_mux,
         twist_stamp,
         controller_manager,
-        delayed_joint_broad_spawner,
-        ack_drive_spawner_event
+        delayed_controller_manager_spawner
     ])
