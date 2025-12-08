@@ -1,5 +1,7 @@
 #include "commands.h"
 #include "motor_driver.h"
+#include "encoder_driver.h"
+
 
 #define BAUDRATE 57600
 
@@ -27,7 +29,7 @@ void setup() {
 
 void loop() {
   processBuffer();
-  // motorUpdate(); // keep PID running
+  //motorUpdate(); // keep PID running
 }
 
 void runCommand() {
@@ -55,7 +57,7 @@ void runCommand() {
       break;
 
     case GET_ENCODER: // "e"
-      Serial.print(getEncoder());
+      Serial.println(getEncoder());
       break;
 
     case TEST_BLINK_ON: // "o"

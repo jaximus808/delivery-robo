@@ -18,7 +18,7 @@ public:
 
   void setup(const std::string &serial_device, int32_t baud_rate, int32_t timeout_ms);
   void sendEmptyMsg();
-  void readEncoderValues(int &val_1, int &val_2, int &val_3, int &val_4);
+  void readEncoderValues(int &val_1);
   void setMotorValues(double rear_cmd, double steer_cmd);
   void setPidValues(float k_p, float k_d, float k_i, float k_o);
 

@@ -152,13 +152,8 @@ return_type AckDriveArduino::read(const rclcpp::Time & time, const rclcpp::Durat
      }
 
 
-    // Read encoder values for all 4 joints from Arduino
-     arduino_.readEncoderValues(left_steer_.enc, right_steer_.enc, 
-                                left_rear_wheel_.enc, right_rear_wheel_.enc);
-
-    
-    RCLCPP_INFO(logger_, "Encoder Value: %d", 
-                left_rear_wheel_.enc);
+    // Read encoder value from Arduino
+     arduino_.readEncoderValues(left_steer_.enc);
 
     // Update steering positions and velocities
      double pos_prev = left_steer_.pos;
@@ -254,15 +249,7 @@ return_type AckDriveArduino::write(const rclcpp::Time & time, const rclcpp::Dura
     RCLCPP_INFO(logger_, "Avg Rear Vel: %.4f rad/s | Linear: %.3f m/s | PWM: %d", 
                 avg_rear_velocity, linear_speed, pwm);
     RCLCPP_INFO(logger_, "Servo Angle: %.2f deg", servo_angle);
-
-    RCLCPP_INFO(logger_, "Left Steering Encoder Value:  %.4f rad (%.2f deg)", 
-                left_steer_.enc);
-    RCLCPP_INFO(logger_, "Right Steering Encoder Value:  %.4f rad (%.2f deg)", 
-               right_steer_.enc);
-    RCLCPP_INFO(logger_, "Left Rear Wheel Encoder Value:  %.4f rad (%.2f deg)", 
-                 left_rear_wheel_.enc);
-    RCLCPP_INFO(logger_, "Right Rear Wheel Encoder Value:  %.4f rad (%.2f deg)", 
-              right_rear_wheel_.enc);
+    RCLCPP_INFO(logger_, "Encoder Value: %d", left_steer_.enc);
     RCLCPP_INFO(logger_, "===================================");
     
     // Send to Arduino
