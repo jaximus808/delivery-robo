@@ -21,6 +21,7 @@ private:
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
     ArduinoComms arduino_;
     Config cfg_;
+    bool verbose_;
 };
 
 #endif // JOYSTICK_TELEOP__JOY_LISTENER_HPP_

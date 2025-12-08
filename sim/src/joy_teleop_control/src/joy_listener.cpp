@@ -3,6 +3,8 @@
 JoyListener::JoyListener()
     : Node("joy_listener")
 {
+    this->declare_parameter("verbose", false);
+    verbose_ = this->get_parameter("verbose").as_bool();
     joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
         "joy",
         10,
@@ -25,19 +27,20 @@ void JoyListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
 
     double servo_angle = STEER_ORIGIN + steer*MAX_STEER;
 
-    RCLCPP_INFO(this->get_logger(),
+    if (verbose_) {
+        RCLCPP_INFO(this->get_logger(),
                 "Throttle: %.2f | Steer: %.2f | A: %d",
                 throttle, steer, a_button);
 
 
-    RCLCPP_INFO(this->get_logger(),
+        RCLCPP_INFO(this->get_logger(),
                 "PWM: %.2f | Angle: %.2f ",
                 pwm, servo_angle);
 
     
+    }
+   
     this->arduino_.setMotorValues(pwm, servo_angle);
-    // TODO: Insert your serial write here
-    // send_serial(steer, throttle);
 }
 
 int main(int argc, char * argv[])
