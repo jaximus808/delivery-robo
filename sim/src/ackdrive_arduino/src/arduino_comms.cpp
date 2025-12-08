@@ -53,12 +53,12 @@ std::string ArduinoComms::sendMsg(const std::string &msg_to_send, bool print_out
 {
 
     serial_conn_.write(msg_to_send);
-    std::string response = serial_conn_.readline();
+    // std::string response = serial_conn_.readline();
 
-    RCLCPP_INFO(rclcpp::get_logger("ArduinoComms"), 
-                "TX: %s | RX: %s", msg_to_send.c_str(), response.c_str());
+    // RCLCPP_INFO(rclcpp::get_logger("ArduinoComms"), 
+    //             "TX: %s | RX: %s", msg_to_send.c_str(), response.c_str());
     
     
 
-    return response;
+    return "response";
 }
