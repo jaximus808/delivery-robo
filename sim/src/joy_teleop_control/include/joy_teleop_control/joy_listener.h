@@ -8,7 +8,7 @@
 
 const double MAX_PWM = 220.0;
 const double MAX_STEER = 45.0;
-const double STEER_ORIGIN = 90.0;
+const double STEER_ORIGIN = 45.0;
 
 class JoyListener : public rclcpp::Node
 {
