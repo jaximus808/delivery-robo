@@ -61,6 +61,13 @@ def generate_launch_description():
         }]
     )
 
+    ack_odom_bridge = Node(
+        package="robo_courier",
+        executable="ackermann_odom_bridge.py",
+        name="ackermann_odom_bridge",
+        parameters=[{'use_sim_time': True}]
+    )
+
     # Path to Gazebo parameters file
     gazebo_params_file = os.path.join(
         get_package_share_directory(package_name),
@@ -117,6 +124,7 @@ def generate_launch_description():
         joystick,
         twist_mux,
         twist_stamp,
+        ack_odom_bridge,
         gazebo,
         spawn_entity,
         ack_drive_spawner,

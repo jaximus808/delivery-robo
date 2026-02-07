@@ -36,49 +36,35 @@
         <hardware>
             <plugin>gazebo_ros2_control/GazeboSystem</plugin>
         </hardware>
-        
+
         <joint name="left_wheel_hinge">
-            <command_interface name="velocity">
-                <param name="min">-1.0</param>
-                <param name="max">1.0</param>
-            </command_interface>
             <command_interface name="position"/>
-            <state_interface name="velocity"/>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
         </joint>
         <joint name="right_wheel_hinge">
-            <command_interface name="velocity">
-                <param name="min">-1.0</param>
-                <param name="max">1.0</param>
-            </command_interface>
             <command_interface name="position"/>
-            <state_interface name="velocity"/>
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
         </joint>
-        
+
         <joint name="left_rear_wheel_joint">
-            <command_interface name="velocity">
-                <param name="min">-10</param>
-                <param name="max">10</param>
-            </command_interface>
+            <command_interface name="velocity"/>
             <state_interface name="velocity"/>
             <state_interface name="position"/>
         </joint>
         <joint name="right_rear_wheel_joint">
-            <command_interface name="velocity">
-                <param name="min">-10</param>
-                <param name="max">10</param>
-            </command_interface>
+            <command_interface name="velocity"/>
             <state_interface name="velocity"/>
             <state_interface name="position"/>
         </joint>
         <joint name="front_left_rotate">
-            <!-- <command_interface name="position"/> -->
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
         </joint>
         <joint name="front_right_rotate">
-            <!-- <command_interface name="position"/> -->
             <state_interface name="position"/>
+            <state_interface name="velocity"/>
         </joint>
     </ros2_control>
 
@@ -88,5 +74,45 @@
             <parameters>$(find robo_courier)/config/gaz_ros2_ctl_use_sim.yaml</parameters>
         </plugin>
     </gazebo>
+
+    <transmission name="left_front_steering_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <actuator name="left_front_steer_motor">
+            <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+        <joint name="left_wheel_hinge">
+            <hardwareInterface>hardware_interface/PositionCommand</hardwareInterface>
+        </joint>
+    </transmission>
+
+    <transmission name="right_front_steering_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <actuator name="right_front_steer_motor">
+            <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+        <joint name="right_wheel_hinge">
+            <hardwareInterface>hardware_interface/PositionCommand</hardwareInterface>
+        </joint>
+    </transmission>
+
+    <transmission name="left_rear_drive_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <actuator name="left_rear_drive_motor">
+            <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+        <joint name="left_rear_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityCommand</hardwareInterface>
+        </joint>
+    </transmission>
+
+    <transmission name="right_rear_drive_transmission">
+        <type>transmission_interface/SimpleTransmission</type>
+        <actuator name="right_rear_drive_motor">
+            <mechanicalReduction>1.0</mechanicalReduction>
+        </actuator>
+        <joint name="right_rear_wheel_joint">
+            <hardwareInterface>hardware_interface/VelocityCommand</hardwareInterface>
+        </joint>
+    </transmission>
 
 </robot>

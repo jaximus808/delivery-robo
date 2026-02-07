@@ -15,9 +15,11 @@ ack_cont:
     front_steering: true
     open_loop: false
     velocity_rolling_window_size: 10
-    position_feedback: false
+    position_feedback: true
     rear_wheels_names: [left_rear_wheel_joint, right_rear_wheel_joint]
     front_wheels_names: [left_wheel_hinge, right_wheel_hinge]
+    rear_wheels_state_names: [left_rear_wheel_joint, right_rear_wheel_joint]
+    front_wheels_state_names: [left_wheel_hinge, right_wheel_hinge]
 
     front_wheel_track: 0.36322
     rear_wheel_track: 0.36322

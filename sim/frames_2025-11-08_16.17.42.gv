@@ -1,0 +1,17 @@
+digraph G {
+"odom" -> "base_link"[label=" Broadcaster: default_authority\nAverage rate: 29.625\nBuffer length: 4.692\nMost recent transform: 535.639\nOldest transform: 530.947\n"];
+"base_link" -> "base_footprint"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"base_link" -> "chassis"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"chassis" -> "imu_link"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"chassis" -> "laser_frame"[label=" Broadcaster: default_authority\nAverage rate: 10000.0\nBuffer length: 0.0\nMost recent transform: 0.0\nOldest transform: 0.0\n"];
+"left_wheel_assembly" -> "front_left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+"base_link" -> "left_wheel_assembly"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+"right_wheel_assembly" -> "front_right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+"base_link" -> "right_wheel_assembly"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+"base_link" -> "left_wheel"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+"base_link" -> "right_wheel"[label=" Broadcaster: default_authority\nAverage rate: 19.68\nBuffer length: 4.624\nMost recent transform: 535.605\nOldest transform: 530.981\n"];
+edge [style=invis];
+ subgraph cluster_legend { style=bold; color=black; label ="view_frames Result";
+"Recorded at time: 1762640262.0745542"[ shape=plaintext ] ;
+}->"odom";
+}
