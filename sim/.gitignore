@@ -61,3 +61,10 @@ CATKIN_IGNORE
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+frames_
+sim/frames_
+
+# Generated frames
+frames_*.gv
+frames_*.pdf

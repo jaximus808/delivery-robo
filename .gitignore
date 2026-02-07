@@ -45,3 +45,7 @@ docs/_build/
 ament_cmake_core/package.cmake
 ament_cmake_core/environment_hooks/
 
+# Generated frames
+frames_*.gv
+frames_*.pdf
+
