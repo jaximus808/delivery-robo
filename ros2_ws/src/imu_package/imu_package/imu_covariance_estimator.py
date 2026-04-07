@@ -133,6 +133,10 @@ class ImuCovarianceEstimator(Node):
         self.get_logger().info(f'linear_acceleration_covariance: {linear_flat}')
         self.get_logger().info('Paste these arrays into your IMU publisher node.')
 
+        with open("imu_covariance_results.txt", "w") as file:
+            file.write(f'orientation_covariance: {orientation_flat}')
+            file.write(f'angular_velocity_covariance: {angular_flat}')
+            file.write(f'linear_acceleration_covariance: {linear_flat}')
         print('\n# YAML-style block for copy/paste')
         print(f'orientation_covariance: {orientation_flat}')
         print(f'angular_velocity_covariance: {angular_flat}')
