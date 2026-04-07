@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'numpy'],
     zip_safe=True,
     maintainer='delivery',
     maintainer_email='vignesh.modigunta@gmail.com',
@@ -24,7 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
-            'imu_publisher = imu_package.imu_node:main'
+            'imu_publisher = imu_package.imu_node:main',
+            'imu_covariance_estimator = imu_package.imu_covariance_estimator:main',
         ],
     },
 )
