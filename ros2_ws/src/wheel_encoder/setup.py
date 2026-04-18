@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'wheel_encoder_node = wheel_encoder.wheel_encoder_node:main',
         ],
     },
 )
