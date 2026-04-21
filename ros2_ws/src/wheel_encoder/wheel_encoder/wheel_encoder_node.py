@@ -22,10 +22,16 @@ class WheelEncoderNode(Node):
 
     def timer_callback(self):
         self.ser.write(b'e\n')
-        line = self.ser.readline().decode('utf-8', errors='replace').strip()
-        msg = String()
-        msg.data = line
-        self.publisher_.publish(msg)
+        raw_line = self.ser.read_all()
+        if raw_line:
+            line = raw_line.decode('utf-8', errors='replace').strip()
+            msg = String()
+            msg.data = line
+            self.publisher_.publish(msg)
+        else:
+            msg = String()
+            msg.data = "No response received"
+            self.publisher_.publish(msg)
 
     def destroy_node(self):
         self.ser.close()
