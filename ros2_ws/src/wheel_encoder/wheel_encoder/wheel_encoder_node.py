@@ -21,7 +21,7 @@ class WheelEncoderNode(Node):
         self.get_logger().info(f'Wheel encoder node started on {port} at {baud} baud')
 
     def timer_callback(self):
-        self.ser.write(b'e\n')
+        self.ser.write(b'e\r')
         raw_line = self.ser.read_all()
         if raw_line:
             line = raw_line.decode('utf-8', errors='replace').strip()
