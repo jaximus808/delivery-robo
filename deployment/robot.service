@@ -1,0 +1,22 @@
+# systemd unit for the delivery robot sensor stack.
+# Install on the Pi:
+#   sudo cp ~/delivery-robo/deployment/robot.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now robot.service
+# Check:   systemctl status robot.service ; journalctl -u robot.service -f
+
+[Unit]
+Description=Delivery robot sensor stack (pull, rebuild, launch)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+User=delivery
+Environment=HOME=/home/delivery
+ExecStart=/home/delivery/delivery-robo/deployment/startup.sh
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

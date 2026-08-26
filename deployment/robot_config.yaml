@@ -1,0 +1,8 @@
+# Robot startup config, read by deployment/startup.sh on every boot.
+# Committed defaults. To override on one Pi without touching git, copy this
+# file to deployment/robot_config.local.yaml (gitignored) and edit that.
+
+# Which stack master_launch.py brings up:
+#   teleop     - wired joystick teleop (joy_node + joystick_control)
+#   autonomous - sensor stack (RTK GPS + NTRIP, IMU)
+mode: teleop
