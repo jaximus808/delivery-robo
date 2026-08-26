@@ -37,4 +37,17 @@ def generate_launch_description():
        output='screen'
    )
 
-   return LaunchDescription([gps_main_node, gps_ntrip_node, imu_node])
+   # RTK lat/lon -> map-frame meters (datum generated from map/georef.yaml;
+   # edit that file + run map/tools/update_georef.py to move the datum)
+   bringup_dir = get_package_share_directory('my_bringup')
+   gps_to_map_node = Node(
+       package='my_bringup',
+       executable='gps_to_map',
+       name='gps_to_map',
+       parameters=[os.path.join(bringup_dir, 'config', 'gps_datum.yaml')],
+       respawn=True,
+       respawn_delay=3.0,
+       output='screen'
+   )
+
+   return LaunchDescription([gps_main_node, gps_ntrip_node, imu_node, gps_to_map_node])

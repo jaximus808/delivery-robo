@@ -29,4 +29,14 @@ install(
   DIRECTORY config description launch worlds
   DESTINATION share/${PROJECT_NAME}
 )
+
+# Campus maps live at the repo root (map/) so they can be edited outside the
+# workspace; install only the files nav2_map_server needs.
+install(
+  DIRECTORY ../../../map/
+  DESTINATION share/${PROJECT_NAME}/maps
+  FILES_MATCHING
+  PATTERN "*.yaml"
+  PATTERN "*.pgm"
+)
 ament_package()

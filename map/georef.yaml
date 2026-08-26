@@ -1,0 +1,27 @@
+# Single source of truth for map georeferencing.
+# Edit this file (e.g. after RTK calibration), then run:
+#     python3 map/tools/update_georef.py
+# to propagate to the Nav2 map yamls and the GPS datum config.
+
+# WGS84 position of the map frame origin = SOUTHWEST corner of the image
+# (bottom-left pixel). X = east, Y = north (ROS ENU).
+datum:
+  lat: 38.6435
+  lon: -90.3161244
+
+resolution: 0.5        # m/pixel
+width_px: 2720         # image extent: 1360 m x 930 m
+height_px: 1860
+
+# Map-frame offset applied to the map origin, in meters [east, north].
+# Leave [0, 0] until the RTK calibration check (README) says otherwise;
+# a consistent shift between RTK fixes and pixel positions goes here.
+origin_offset_m: [0.0, 0.0]
+
+# Derived WGS84 bounding box (for reference only, not read by tools):
+#   lon -90.3161244 .. -90.3005
+#   lat  38.6435    ..  38.6518784
+# Provenance: USDA/USGS NAIP via imagery.nationalmap.gov, exported
+# 2026-08-12 as 4004x2664 (lon -90.3235..-90.3005, lat 38.6435..38.6555),
+# cropped to campus with map/tools/crop_to_campus.py (window x 1284..4004,
+# y 804..2664 of the original).
