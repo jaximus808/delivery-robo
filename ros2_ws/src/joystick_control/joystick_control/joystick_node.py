@@ -23,7 +23,7 @@ class JoystickNode(Node):
 
         
         # Constants
-        self.MAX_PWM = 44.0
+        self.MAX_PWM = 110.0
         self.MAX_STEER = 25.0
         self.STEER_ORIGIN = 45.0
         

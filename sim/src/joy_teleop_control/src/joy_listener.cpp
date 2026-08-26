@@ -18,7 +18,7 @@ JoyListener::JoyListener()
 void JoyListener::joy_callback(const sensor_msgs::msg::Joy::SharedPtr msg)
 {
     // Example axes (you can remap however you want)
-    double steer = msg->axes[2];     // left stick X
+    double steer = msg->axes[0];     // left stick X
     double throttle = msg->axes[1];  // left stick Y
 
     bool a_button = msg->buttons[9];
