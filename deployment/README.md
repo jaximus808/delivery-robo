@@ -23,15 +23,33 @@ start it:
    changes are never clobbered);
 2. rebuilds `ros2_ws` with colcon **only if** the repo moved or there is no
    install yet (build failure falls back to the previous install);
-3. launches the sensor stack: `ros2 launch my_bringup master_launch.py`
-   (RTK GPS + NTRIP, IMU, gps_to_map).
+3. reads `deployment/robot_config.yaml` and launches
+   `ros2 launch my_bringup master_launch.py mode:=<mode>`.
 
 So the normal deploy flow is: **merge to `main`, then reboot the robot** (or
 `sudo systemctl restart robot.service`). No hand-building on the Pi.
 
-Note: only the *sensor* stack starts at boot. The drive stack
-(`launch_real_robot.launch.py` in `sim/`, ros2_control + joystick) is still
-launched manually.
+## Robot config (`deployment/robot_config.yaml`)
+
+```yaml
+mode: teleop        # teleop | autonomous
+```
+
+- `teleop` — wired joystick: `joy_node` + `joystick_control/joystick_node`
+  (the setup verified working on the Pi).
+- `autonomous` — sensor stack: RTK GPS + NTRIP (`ublox_dgnss`), IMU.
+
+The committed file is the default for every Pi. To change the mode on one
+robot without a git commit (a local edit to a tracked file would block the
+boot-time `git pull`), copy it to `deployment/robot_config.local.yaml`
+(gitignored) — that file wins when present. `ROBOT_CONFIG=/path/to.yaml`
+overrides both. Unknown/missing mode falls back to `teleop`.
+
+The same switch works by hand:
+`ros2 launch my_bringup master_launch.py mode:=autonomous`.
+
+Note: the ros2_control drive stack (`launch_real_robot.launch.py` in `sim/`)
+is still launched manually.
 
 ## Installing / re-wiring the service on the Pi
 

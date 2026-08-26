@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Boot script for the delivery robot Pi (user: delivery, host: raspi).
-# On every start: fetch the repo, rebuild if anything changed, then launch the
-# sensor stack. Designed to be run by systemd (see robot.service) but works
+# On every start: fetch the repo, rebuild if anything changed, read
+# robot_config.yaml, then launch master_launch.py in the configured mode
+# (teleop / autonomous). Designed to be run by systemd (see robot.service) but works
 # fine by hand: ~/delivery-robo/deployment/startup.sh
 #
 # Failure behavior is deliberately "start anyway": no network -> skip the pull;
@@ -13,6 +14,10 @@ REPO="${REPO:-$HOME/delivery-robo}"
 WS="$REPO/ros2_ws"
 BRANCH="${BRANCH:-main}"
 ROS_SETUP=/opt/ros/jazzy/setup.bash
+# Committed config, optionally shadowed by an untracked per-Pi override.
+CONFIG="$REPO/deployment/robot_config.yaml"
+[ -f "$REPO/deployment/robot_config.local.yaml" ] && CONFIG="$REPO/deployment/robot_config.local.yaml"
+CONFIG="${ROBOT_CONFIG:-$CONFIG}"
 
 log() { echo "[startup] $*"; }
 
@@ -52,10 +57,26 @@ if [ "$REBUILD" = 1 ]; then
   fi
 fi
 
-# --- 3. Launch the sensor stack --------------------------------------------
+# --- 3. Read the robot config ----------------------------------------------
+# Top-level "key: value" only; no yq/python dependency so boot can't fail on it.
+cfg_get() { sed -n "s/^[[:space:]]*$1:[[:space:]]*\([^#]*\).*/\1/p" "$CONFIG" | head -n1 | xargs; }
+MODE=""
+if [ -f "$CONFIG" ]; then
+  MODE=$(cfg_get mode)
+  log "config $CONFIG"
+else
+  log "WARNING: config $CONFIG not found"
+fi
+MODE="${MODE:-teleop}"
+case "$MODE" in
+  teleop|autonomous) ;;
+  *) log "WARNING: unknown mode '$MODE', falling back to teleop"; MODE=teleop ;;
+esac
+
+# --- 4. Launch -------------------------------------------------------------
 # shellcheck disable=SC1090
 source "$ROS_SETUP"
 # shellcheck disable=SC1090
 source "$WS/install/setup.bash"
-log "launching my_bringup master_launch.py"
-exec ros2 launch my_bringup master_launch.py
+log "launching my_bringup master_launch.py mode:=$MODE"
+exec ros2 launch my_bringup master_launch.py "mode:=$MODE"
