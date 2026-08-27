@@ -8,7 +8,9 @@
 # Failure behavior is deliberately "start anyway": no network -> skip the pull;
 # build fails -> fall back to the last good install. The robot should come up
 # in the field even when GitHub is unreachable.
-set -uo pipefail
+# No `set -u`: ROS setup.bash files reference unset vars (AMENT_TRACE_SETUP_FILES)
+# and would abort the script under nounset.
+set -o pipefail
 
 REPO="${REPO:-$HOME/delivery-robo}"
 WS="$REPO/ros2_ws"
