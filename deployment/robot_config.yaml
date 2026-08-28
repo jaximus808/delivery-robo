@@ -6,3 +6,10 @@
 #   teleop     - wired joystick teleop (joy_node + joystick_control)
 #   autonomous - sensor stack (RTK GPS + NTRIP, IMU)
 mode: teleop
+
+# Identity shown on the robo-web dashboard (../robo-web, deployed on Vercel).
+robot_id: robo-1
+
+# Base URL of the robo-web deployment. startup.sh and the heartbeat node
+# POST to <api_url>/api/heartbeat.
+api_url: https://robo-web-ebon.vercel.app

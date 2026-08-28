@@ -19,8 +19,41 @@ def generate_launch_description():
       choices=['teleop', 'autonomous'],
       description='teleop = wired joystick control; autonomous = sensor stack (GPS/NTRIP/IMU)',
    )
+   robot_id = LaunchConfiguration('robot_id')
+   api_url = LaunchConfiguration('api_url')
+   robot_id_arg = DeclareLaunchArgument(
+      'robot_id', default_value='robo-1',
+      description='id shown on the robo-web dashboard',
+   )
+   api_url_arg = DeclareLaunchArgument(
+      'api_url', default_value='https://robo-web-ebon.vercel.app',
+      description='robo-web base URL; heartbeat POSTs to <api_url>/api/heartbeat',
+   )
    is_teleop = IfCondition(PythonExpression(["'", mode, "' == 'teleop'"]))
    is_autonomous = IfCondition(PythonExpression(["'", mode, "' == 'autonomous'"]))
+
+   # --- heartbeat: both modes, reports status to robo-web ----------------
+   # Guard: with --symlink-install this launch file is the *new* one even when
+   # the build failed and the install is the *old* one. A Node whose executable
+   # is missing aborts the whole launch, so only add it if it was built.
+   try:
+      from ament_index_python.packages import get_package_prefix
+      _hb_exe = os.path.join(get_package_prefix('my_bringup'), 'lib', 'my_bringup', 'heartbeat_node')
+      heartbeat_available = os.path.exists(_hb_exe)
+   except Exception:  # noqa: BLE001
+      heartbeat_available = False
+   if not heartbeat_available:
+      print('[master_launch] heartbeat_node executable not found (stale build?); skipping status heartbeat')
+
+   heartbeat_node = Node(
+      package='my_bringup',
+      executable='heartbeat_node',
+      name='heartbeat',
+      respawn=True,
+      respawn_delay=3.0,
+      output='screen',
+      parameters=[{'robot_id': robot_id, 'api_url': api_url, 'mode': mode}],
+   )
 
    # --- teleop: wired joystick (verified working on the Pi, keep as-is) -----
    joy_node = Node(
@@ -90,6 +123,9 @@ def generate_launch_description():
 
    return LaunchDescription([
         mode_arg,
+        robot_id_arg,
+        api_url_arg,
+        *([heartbeat_node] if heartbeat_available else []),
         joy_node, 
         control_node, 
         *autonomous_nodes

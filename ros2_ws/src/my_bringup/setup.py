@@ -27,6 +27,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'heartbeat_node = my_bringup.heartbeat_node:main',
         ],
     },
 )

@@ -23,6 +23,28 @@ CONFIG="${ROBOT_CONFIG:-$CONFIG}"
 
 log() { echo "[startup] $*"; }
 
+# Top-level "key: value" only; no yq/python dependency so boot can't fail on it.
+cfg_get() { sed -n "s/^[[:space:]]*$1:[[:space:]]*\([^#]*\).*/\1/p" "$CONFIG" | head -n1 | xargs; }
+
+# --- 0. Tell robo-web we're alive, before anything slow happens -------------
+# Fire-and-forget, bounded by curl -m so an unreachable API costs <5 s and
+# never blocks boot. The ROS heartbeat node takes over once the launch is up.
+ROBOT_ID=""; API_URL=""
+if [ -f "$CONFIG" ]; then
+  ROBOT_ID=$(cfg_get robot_id)
+  API_URL=$(cfg_get api_url)
+fi
+ROBOT_ID="${ROBOT_ID:-robo-1}"
+API_URL="${API_URL%/}"
+announce() {  # announce <state> <stage>
+  [ -n "$API_URL" ] || return 0
+  command -v curl >/dev/null 2>&1 || return 0
+  curl -m 5 -s -X POST "$API_URL/api/heartbeat" -H 'content-type: application/json' \
+    -d "{\"id\":\"$ROBOT_ID\",\"state\":\"$1\",\"stage\":\"$2\",\"hostname\":\"$(hostname)\",\"uptime_s\":$(cut -d' ' -f1 /proc/uptime 2>/dev/null || echo 0)}" \
+    >/dev/null 2>&1 &
+}
+announce booting startup.sh
+
 cd "$REPO" || { echo "[startup] repo missing at $REPO"; exit 1; }
 
 # --- 1. Pull if we can reach the remote (bounded so boot never hangs) -------
@@ -60,8 +82,6 @@ if [ "$REBUILD" = 1 ]; then
 fi
 
 # --- 3. Read the robot config ----------------------------------------------
-# Top-level "key: value" only; no yq/python dependency so boot can't fail on it.
-cfg_get() { sed -n "s/^[[:space:]]*$1:[[:space:]]*\([^#]*\).*/\1/p" "$CONFIG" | head -n1 | xargs; }
 MODE=""
 if [ -f "$CONFIG" ]; then
   MODE=$(cfg_get mode)
@@ -80,5 +100,7 @@ esac
 source "$ROS_SETUP"
 # shellcheck disable=SC1090
 source "$WS/install/setup.bash"
-log "launching my_bringup master_launch.py mode:=$MODE"
-exec ros2 launch my_bringup master_launch.py "mode:=$MODE"
+announce booting launching
+log "launching my_bringup master_launch.py mode:=$MODE robot_id:=$ROBOT_ID api_url:=$API_URL"
+exec ros2 launch my_bringup master_launch.py "mode:=$MODE" "robot_id:=$ROBOT_ID" \
+  ${API_URL:+"api_url:=$API_URL"}

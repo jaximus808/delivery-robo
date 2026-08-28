@@ -33,6 +33,8 @@ So the normal deploy flow is: **merge to `main`, then reboot the robot** (or
 
 ```yaml
 mode: teleop        # teleop | autonomous
+robot_id: robo-1    # name shown on the robo-web dashboard
+api_url: https://robo-web-ebon.vercel.app   # robo-web base URL (no trailing slash)
 ```
 
 - `teleop` — wired joystick: `joy_node` + `joystick_control/joystick_node`
@@ -48,8 +50,68 @@ overrides both. Unknown/missing mode falls back to `teleop`.
 The same switch works by hand:
 `ros2 launch my_bringup master_launch.py mode:=autonomous`.
 
+- `robot_id` / `api_url` — identity and endpoint for the status heartbeat
+  (see below). Fill in `api_url` with the Vercel URL of `../robo-web`.
+
 Note: the ros2_control drive stack (`launch_real_robot.launch.py` in `sim/`)
 is still launched manually.
+
+## Status heartbeat (robo-web)
+
+The robot reports itself to the `robo-web` dashboard (separate repo,
+`../robo-web`, deployed on Vercel) so nobody has to hunt for IPs at a demo.
+Two things send it:
+
+1. **`startup.sh`** fires a fire-and-forget `curl -m 5` POST at the very top
+   (`state: booting`, `stage: startup.sh`) and again right before the launch
+   (`stage: launching`) — so the robot shows up on the dashboard seconds after
+   power-on, long before ROS is up. Unreachable API = 5 s lost, nothing else.
+2. **`my_bringup/heartbeat_node`** (`ros2_ws/src/my_bringup/my_bringup/heartbeat_node.py`),
+   started by `master_launch.py` in every mode with `respawn=True`. Every
+   `interval_s` (5 s) it POSTs a full status; network errors are logged
+   (throttled to one warning / 30 s) and never crash the node.
+   `state` is `booting` until the node has been up one interval and sees at
+   least one other ROS node, then it becomes the mode (`teleop`/`autonomous`).
+
+By hand:
+
+```sh
+ros2 run my_bringup heartbeat_node --ros-args -p api_url:=https://x.vercel.app -p robot_id:=robo-1
+ros2 launch my_bringup master_launch.py mode:=teleop robot_id:=robo-1 api_url:=https://x.vercel.app
+```
+
+### API contract
+
+- `POST <api_url>/api/heartbeat` — JSON body; the server upserts the robot by
+  `id` and stamps `last_seen`. All fields except `id` are optional:
+
+  ```json
+  {
+    "id": "robo-1",
+    "state": "booting | teleop | autonomous",
+    "mode": "teleop",
+    "stage": "startup.sh | launching | ros",
+    "hostname": "raspi",
+    "ips": ["10.0.0.12"],
+    "uptime_s": 83.4,
+    "git_sha": "0356c3e",
+    "ros_distro": "jazzy",
+    "ros_nodes": ["joy_node", "control_node"],
+    "ros_topics": ["/joy", "/cmd_vel"],
+    "cpu_temp_c": 51.0,
+    "load_avg": [0.5, 0.4, 0.3],
+    "last_joy_age_s": 0.3,
+    "last_cmd_vel": {"linear_x": 0.2, "angular_z": 0.0},
+    "heartbeat_seq": 42,
+    "ts": 1787943000.0
+  }
+  ```
+
+- `POST <api_url>/api/status` — `{"id": "robo-1", "state": "dead"}`; used by the
+  dashboard itself to mark a robot dead after 20 s without a heartbeat
+  (Vercel has no free long-running timers, so the browser does it).
+- `GET <api_url>/api/robots` — list of every known robot with its last
+  payload and `last_seen`.
 
 ## Installing / re-wiring the service on the Pi
 
@@ -101,3 +163,15 @@ Things the Pi needs that no script installs yet — verify when reimaging:
   any launch)
 - stray copies exist in the home dir (`~/relivery-robo-old`, a loose
   `~/build`/`~/install`) — do not source those by accident
+
+## WiFi: hotspot first, wustl-guest fallback
+
+`deployment/wifi/` sets wlan0 up with `wpa_supplicant@wlan0` (priority-ordered
+SSIDs) + `systemd-networkd` DHCP. The hotspot has `priority=10`, `wustl-guest-2.0`
+`priority=1` (lab wifi `wurc5` at 5), so the Pi joins the hotspot whenever it's in range and drops to
+wustl-guest otherwise (and switches back when the hotspot returns). One-time
+install on the Pi:
+
+```sh
+HOTSPOT_SSID='<ssid>' HOTSPOT_PSK='<password>' sudo -E deployment/wifi/install.sh
+```
